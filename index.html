@@ -7,30 +7,31 @@
 <meta name="apple-mobile-web-app-title" content="好厝營運台">
 <meta name="application-name" content="好厝營運台">
 <meta name="theme-color" content="#f7f1e6">
-<!-- 好厝 logo 當主畫面 icon（這一頁是我們自己的，iOS 會讀）-->
+<!-- 好厝 logo 當主畫面 icon（這一頁是我們自己的網域，iOS 會讀到）-->
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<!-- 進來就跳營運台 -->
-<meta http-equiv="refresh" content="0;url=https://script.google.com/macros/s/AKfycbzllxN3LRfBzWxTvF6n-sKE5q5xmlJAs35xaVhsjSqAKvr-d4GHjTzrhDXs9YJQ0gVo/exec">
 <style>
   html,body{height:100%;margin:0}
-  body{background:#f7f1e6;color:#7a5a3a;font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
-       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-  img{width:120px;height:120px;border-radius:26px;box-shadow:0 6px 20px rgba(122,90,58,.18)}
-  .t{font-size:18px;letter-spacing:2px}
-  .s{font-size:13px;opacity:.6}
-  a{color:#7a5a3a}
+  body{background:#f7f1e6;color:#7a5a3a;
+       font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+       display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+       -webkit-tap-highlight-color:transparent;cursor:pointer;text-align:center;padding:24px}
+  img{width:128px;height:128px;border-radius:28px;box-shadow:0 8px 24px rgba(122,90,58,.2)}
+  .t{font-size:20px;letter-spacing:3px;font-weight:600}
+  .btn{margin-top:4px;background:#7a5a3a;color:#fff;border:none;border-radius:999px;
+       padding:14px 40px;font-size:17px;letter-spacing:2px;box-shadow:0 4px 14px rgba(122,90,58,.3)}
+  .s{font-size:12px;opacity:.55;line-height:1.7;max-width:300px}
 </style>
 </head>
-<body>
+<body onclick="go()">
   <img src="icon-512.png" alt="好厝營運台">
   <div class="t">好厝營運台</div>
-  <div class="s">載入中…</div>
-  <div class="s">沒自動跳轉就按 <a href="https://script.google.com/macros/s/AKfycbzllxN3LRfBzWxTvF6n-sKE5q5xmlJAs35xaVhsjSqAKvr-d4GHjTzrhDXs9YJQ0gVo/exec">這裡進入</a></div>
+  <button class="btn" onclick="go();event.stopPropagation()">進入 →</button>
+  <div class="s">第一次設定：按手機分享 ⬆️ →「加入主畫面」，桌面就會出現好厝 logo。<br>以後點 logo 進這頁，按「進入」就到營運台。</div>
 <script>
-  // 立即跳轉（replace：不留這頁在返回歷史）
-  location.replace("https://script.google.com/macros/s/AKfycbzllxN3LRfBzWxTvF6n-sKE5q5xmlJAs35xaVhsjSqAKvr-d4GHjTzrhDXs9YJQ0gVo/exec");
+  var EXEC="https://script.google.com/macros/s/AKfycbzllxN3LRfBzWxTvF6n-sKE5q5xmlJAs35xaVhsjSqAKvr-d4GHjTzrhDXs9YJQ0gVo/exec";
+  function go(){ location.href = EXEC; }
 </script>
 </body>
 </html>

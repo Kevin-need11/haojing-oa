@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>好厝 · 查詢</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;background:#f3f4f6;color:#111827}
+.hd{background:#2D5A3D;color:#fff;padding:14px 16px;font-weight:800;font-size:17px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:#fff;position:sticky;top:0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tab{flex:0 0 auto;border:1px solid #d1d5db;border-radius:18px;padding:6px 14px;font-size:13px;font-weight:700;color:#374151;background:#fff;cursor:pointer}
+.tab.on{background:#2D5A3D;color:#fff;border-color:#2D5A3D}
+.body{padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.7}
+.msg{padding:28px 18px;text-align:center;color:#6b7280;font-size:14px}
+a{color:#2563eb;word-break:break-all}
+.sp{display:inline-block;width:16px;height:16px;border:2px solid #cbd5e1;border-top-color:#2D5A3D;border-radius:50%;animation:s .8s linear infinite;vertical-align:middle}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="hd" id="hd">好厝</div>
+<div class="tabs" id="tabs"></div>
+<div class="body" id="body"><div class="msg"><span class="sp"></span> 載入中…</div></div>
+<script>
+// ★好厝 LIFF 前端（放 GitHub Pages·乾淨網址跑 liff.init，不被 GAS 沙盒 iframe 卡住）。
+//   資料走 JSONP 回打 GAS liffdata 端點；id_token 由 LINE 簽發、GAS 端 verifyLiffIdToken_ 驗證取可信 userId。
+var LIFF_ID = '2009017763-NVmMh6pv';
+var GAS = 'https://script.google.com/macros/s/AKfycbyhM-I6LKZFtwQ9-XmhViB3GsG7AYgdi6udclG4dq5T8oShfNLZvLLqCUcnTYDyQL8V/exec';
+var ID_TOKEN = '', ROLE = '';
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function linkify(s){return esc(s).replace(/(https?:\/\/[^\s]+)/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>'})}
+function setErr(m){document.getElementById('body').innerHTML='<div class="msg">'+esc(m)+'</div>';document.getElementById('tabs').innerHTML=''}
+
+// JSONP：建 <script> 打 GAS，回來呼叫 callback。15 秒逾時保護。
+function jsonp(params, cb){
+  var name = '__hz_cb_' + Math.floor(Math.random()*1e9) + '_' + (jsonp._n = (jsonp._n||0)+1);
+  var s = document.createElement('script');
+  var done = false;
+  var to = setTimeout(function(){ if(done) return; done=true; cleanup(); cb(null); }, 15000);
+  function cleanup(){ clearTimeout(to); try{ delete window[name]; }catch(e){ window[name]=undefined; } if(s.parentNode) s.parentNode.removeChild(s); }
+  window[name] = function(data){ if(done) return; done=true; cleanup(); cb(data); };
+  s.onerror = function(){ if(done) return; done=true; cleanup(); cb(null); };
+  s.src = GAS + '?action=liffdata&callback=' + encodeURIComponent(name) + '&view=' + encodeURIComponent(params.view||'') + '&idToken=' + encodeURIComponent(params.idToken||'');
+  document.body.appendChild(s);
+}
+
+function render(r){
+  if(!r){ setErr('連線逾時，請下拉重整或關掉重開。'); return; }
+  if(!r.ok){ setErr(r.error||'查詢失敗'); return; }
+  ROLE = r.role;
+  document.getElementById('hd').textContent = '好厝 · ' + (r.role==='customer'?'清潔查詢':'班表查詢') + '（' + (r.name||'') + '）';
+  var t = document.getElementById('tabs'); t.innerHTML='';
+  (r.tabs||[]).forEach(function(tb){ var d=document.createElement('div'); d.className='tab'+(tb.key===r.view?' on':''); d.textContent=tb.label; d.onclick=function(){ load(tb.key); }; t.appendChild(d); });
+  document.getElementById('body').innerHTML = (r.text && r.text.trim()) ? linkify(r.text) : '<div class="msg">目前沒有資料。</div>';
+}
+
+function load(view){
+  document.getElementById('body').innerHTML = '<div class="msg"><span class="sp"></span></div>';
+  jsonp({ view: view, idToken: ID_TOKEN }, render);
+}
+
+function start(){
+  if(!LIFF_ID){ setErr('LIFF 尚未設定。'); return; }
+  liff.init({ liffId: LIFF_ID }).then(function(){
+    if(!liff.isLoggedIn()){ liff.login(); return; }
+    ID_TOKEN = liff.getIDToken() || '';
+    if(!ID_TOKEN){ setErr('無法取得登入憑證，請在 LINE App 內重新開啟（需 openid 權限）。'); return; }
+    load('');
+  }).catch(function(e){ setErr('LIFF 初始化失敗，請重新開啟。' + (e && e.message ? '（'+e.message+'）' : '')); });
+}
+start();
+</script>
+</body>
+</html>

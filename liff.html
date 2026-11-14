@@ -62,13 +62,26 @@ function load(view){
   jsonp({ view: view, idToken: ID_TOKEN }, render);
 }
 
+// 從按鈕帶來的 view 參數決定一進來停在哪個分頁。
+//   按鈕用 liff.line.me/LIFF_ID?view=week → LINE 可能把原 query 塞進 ?view= 或包進 liff.state，兩邊都看。
+function getViewParam(){
+  try{
+    var sp = new URLSearchParams(window.location.search || '');
+    var v = sp.get('view') || '';
+    if(!v){
+      var st = sp.get('liff.state') || '';
+      if(st){ var m = decodeURIComponent(st).match(/[?&]view=([a-zA-Z]+)/); if(m) v = m[1]; }
+    }
+    return /^[a-zA-Z]+$/.test(v) ? v : '';
+  }catch(e){ return ''; }
+}
 function start(){
   if(!LIFF_ID){ setErr('LIFF 尚未設定。'); return; }
   liff.init({ liffId: LIFF_ID }).then(function(){
     if(!liff.isLoggedIn()){ liff.login(); return; }
     ID_TOKEN = liff.getIDToken() || '';
     if(!ID_TOKEN){ setErr('無法取得登入憑證，請在 LINE App 內重新開啟（需 openid 權限）。'); return; }
-    load('');
+    load(getViewParam());
   }).catch(function(e){ setErr('LIFF 初始化失敗，請重新開啟。' + (e && e.message ? '（'+e.message+'）' : '')); });
 }
 start();

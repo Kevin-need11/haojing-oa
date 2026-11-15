@@ -12,6 +12,8 @@ body{margin:0;font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-
 .tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:#fff;position:sticky;top:0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .tab{flex:0 0 auto;border:1px solid #d1d5db;border-radius:18px;padding:6px 14px;font-size:13px;font-weight:700;color:#374151;background:#fff;cursor:pointer}
 .tab.on{background:#2D5A3D;color:#fff;border-color:#2D5A3D}
+.pick{padding:8px 12px;background:#fff;border-bottom:1px solid #eee;display:flex;align-items:center}
+.pick:empty{display:none}
 .body{padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.7}
 .msg{padding:28px 18px;text-align:center;color:#6b7280;font-size:14px}
 a{color:#2563eb;word-break:break-all}
@@ -21,6 +23,7 @@ a{color:#2563eb;word-break:break-all}
 </head>
 <body>
 <div class="hd" id="hd">好厝</div>
+<div class="pick" id="pick"></div>
 <div class="tabs" id="tabs"></div>
 <div class="body" id="body"><div class="msg"><span class="sp"></span> 載入中…</div></div>
 <script>
@@ -52,6 +55,15 @@ function render(r){
   if(!r.ok){ setErr(r.error||'查詢失敗'); return; }
   ROLE = r.role;
   document.getElementById('hd').textContent = '好厝 · ' + (r.role==='customer'?'清潔查詢':'班表查詢') + '（' + (r.name||'') + '）';
+  var pk = document.getElementById('pick'); pk.innerHTML='';
+  if(r.staffList && r.staffList.length){
+    var lb=document.createElement('span'); lb.textContent='👤 選員工：'; lb.style.cssText='font-size:13px;font-weight:700;color:#374151;margin-right:6px';
+    var se=document.createElement('select'); se.style.cssText='font-size:14px;padding:5px 8px;border:1px solid #d1d5db;border-radius:8px;max-width:60%';
+    var o0=document.createElement('option'); o0.value=''; o0.textContent='—（我自己）—'; se.appendChild(o0);
+    r.staffList.forEach(function(n){ var o=document.createElement('option'); o.value=n; o.textContent=n; if(n===r.selectedStaff) o.selected=true; se.appendChild(o); });
+    se.onchange=function(){ var nm=this.value; load(nm?('adm|'+nm+'|today'):''); };
+    pk.appendChild(lb); pk.appendChild(se);
+  }
   var t = document.getElementById('tabs'); t.innerHTML='';
   (r.tabs||[]).forEach(function(tb){ var d=document.createElement('div'); d.className='tab'+(tb.key===r.view?' on':''); d.textContent=tb.label; d.onclick=function(){ load(tb.key); }; t.appendChild(d); });
   document.getElementById('body').innerHTML = (r.text && r.text.trim()) ? linkify(r.text) : '<div class="msg">目前沒有資料。</div>';
